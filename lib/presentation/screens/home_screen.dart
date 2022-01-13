@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:personalexpenses/repository/expense_model.dart';
-import 'package:personalexpenses/repository/expense_model_offline.dart';
+//import 'package:personalexpenses/repository/expense_model_offline.dart';
 import 'package:personalexpenses/presentation/widgets/expense_tile.dart';
 import 'package:personalexpenses/presentation/widgets/add_widget.dart';
 import 'package:personalexpenses/presentation/widgets/details_widget.dart';
@@ -17,13 +17,17 @@ class HomeScreen extends StatefulWidget {
   _HomeScreenState createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
-  late Future<ExpenseList> futureExpenseList;
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
+  late Future<Expense> futureExpense;
+  late final Animation<Offset> _animationOffset =
+      Tween<Offset>(begin: const Offset(0.0, 1.0), end: const Offset(0.0, 0.0))
+          as Animation<Offset>;
 
   @override
   void initState() {
     super.initState();
-    futureExpenseList = fetchExpenseList();
+    futureExpense = fetchExpenseList();
   }
 
   @override
@@ -38,6 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
           decoration: const BoxDecoration(
             image: DecorationImage(
                 image: AssetImage('./assets/images/screen_back.png'),
+                alignment: FractionalOffset.topCenter,
                 fit: BoxFit.cover),
           ),
           child: Padding(
@@ -93,14 +98,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-/*
-                FutureBuilder<ExpenseList>(
-                  future: futureExpenseList,
+
+                FutureBuilder<Expense>(
+                  future: futureExpense,
                   builder: (BuildContext context, AsyncSnapshot snapshot) {
                     if (snapshot.hasData) {
-                      ExpenseList expenseList = snapshot.data;
+                      //Expense expenseList = snapshot.data;
                       return ListView.builder(
-                        itemCount: expenseList.expenses.length,
+                        itemCount: snapshot.data.length,
                         itemBuilder: (BuildContext context, int index) {
                           return GestureDetector(
                             onTap: () => showModalBottomSheet(
@@ -109,12 +114,14 @@ class _HomeScreenState extends State<HomeScreen> {
                                 .then((_) {
                               setState(() {});
                             }),
-                            child: ExpenseTile(
-                              id: expenseList.expenses[index].id,
-                              expenseTitle:
-                                  expenseList.expenses[index].expenseTitle,
-                              dateTime: expenseList.expenses[index].dateTime,
-                              amount: expenseList.expenses[index].amount,
+                            child: SlideTransition(
+                              position: _animationOffset,
+                              child: ExpenseTile(
+                                id: snapshot.data[index].id,
+                                expenseTitle: snapshot.data[index].expenseTitle,
+                                dateTime: snapshot.data[index].dateTime,
+                                amount: snapshot.data[index].amount,
+                              ),
                             ),
                           );
                         },
@@ -124,8 +131,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     }
                   },
                 )
-*/
-                // Offline Demo Start
+
+/*                // Offline Demo Start
                 ListView.builder(
                   shrinkWrap: true,
                   itemCount: expensesListOffline.length,
@@ -145,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     );
                   },
                 ),
-                // Offline Demo End
+*/ // Offline Demo End
               ],
             ),
           ),
